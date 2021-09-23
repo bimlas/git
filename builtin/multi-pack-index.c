@@ -55,7 +55,6 @@ static struct opts_multi_pack_index {
 static struct option common_opts[] = {
 	OPT_FILENAME(0, "object-dir", &opts.object_dir,
 	  N_("object directory containing set of packfile and pack-index pairs")),
-	OPT_BIT(0, "progress", &opts.flags, N_("force progress reporting"), MIDX_PROGRESS),
 	OPT_END(),
 };
 
@@ -87,6 +86,8 @@ static int cmd_multi_pack_index_write(int argc, const char **argv)
 			 N_("write multi-pack index containing only given indexes")),
 		OPT_FILENAME(0, "refs-snapshot", &opts.refs_snapshot,
 			     N_("refs snapshot for selecting bitmap commits")),
+		OPT_BIT(0, "progress", &opts.flags,
+			N_("force progress reporting"), MIDX_PROGRESS),
 		OPT_END(),
 	};
 
@@ -94,6 +95,8 @@ static int cmd_multi_pack_index_write(int argc, const char **argv)
 
 	trace2_cmd_mode(argv[0]);
 
+	if (isatty(2))
+		opts.flags |= MIDX_PROGRESS;
 	argc = parse_options(argc, argv, NULL,
 			     options, builtin_multi_pack_index_write_usage,
 			     PARSE_OPT_KEEP_UNKNOWN);
@@ -124,10 +127,18 @@ static int cmd_multi_pack_index_write(int argc, const char **argv)
 
 static int cmd_multi_pack_index_verify(int argc, const char **argv)
 {
-	struct option *options = common_opts;
+	struct option *options;
+	static struct option builtin_multi_pack_index_verify_options[] = {
+		OPT_BIT(0, "progress", &opts.flags,
+			N_("force progress reporting"), MIDX_PROGRESS),
+		OPT_END(),
+	};
+	options = add_common_options(builtin_multi_pack_index_verify_options);
 
 	trace2_cmd_mode(argv[0]);
 
+	if (isatty(2))
+		opts.flags |= MIDX_PROGRESS;
 	argc = parse_options(argc, argv, NULL,
 			     options, builtin_multi_pack_index_verify_usage,
 			     PARSE_OPT_KEEP_UNKNOWN);
@@ -140,10 +151,18 @@ static int cmd_multi_pack_index_verify(int argc, const char **argv)
 
 static int cmd_multi_pack_index_expire(int argc, const char **argv)
 {
-	struct option *options = common_opts;
+	struct option *options;
+	static struct option builtin_multi_pack_index_expire_options[] = {
+		OPT_BIT(0, "progress", &opts.flags,
+			N_("force progress reporting"), MIDX_PROGRESS),
+		OPT_END(),
+	};
+	options = add_common_options(builtin_multi_pack_index_expire_options);
 
 	trace2_cmd_mode(argv[0]);
 
+	if (isatty(2))
+		opts.flags |= MIDX_PROGRESS;
 	argc = parse_options(argc, argv, NULL,
 			     options, builtin_multi_pack_index_expire_usage,
 			     PARSE_OPT_KEEP_UNKNOWN);
@@ -160,6 +179,8 @@ static int cmd_multi_pack_index_repack(int argc, const char **argv)
 	static struct option builtin_multi_pack_index_repack_options[] = {
 		OPT_MAGNITUDE(0, "batch-size", &opts.batch_size,
 		  N_("during repack, collect pack-files of smaller size into a batch that is larger than this size")),
+		OPT_BIT(0, "progress", &opts.flags,
+		  N_("force progress reporting"), MIDX_PROGRESS),
 		OPT_END(),
 	};
 
@@ -167,6 +188,8 @@ static int cmd_multi_pack_index_repack(int argc, const char **argv)
 
 	trace2_cmd_mode(argv[0]);
 
+	if (isatty(2))
+		opts.flags |= MIDX_PROGRESS;
 	argc = parse_options(argc, argv, NULL,
 			     options,
 			     builtin_multi_pack_index_repack_usage,
@@ -188,8 +211,6 @@ int cmd_multi_pack_index(int argc, const char **argv,
 
 	git_config(git_default_config, NULL);
 
-	if (isatty(2))
-		opts.flags |= MIDX_PROGRESS;
 	argc = parse_options(argc, argv, prefix,
 			     builtin_multi_pack_index_options,
 			     builtin_multi_pack_index_usage,
