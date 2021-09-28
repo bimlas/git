@@ -465,6 +465,16 @@ centrally configure your Git hooks instead of configuring them on a
 per-repository basis, or as a more flexible and centralized
 alternative to having an `init.templateDir` where you've changed
 default hooks.
++
+If you also want to run per-repository hooks along with the hooks in the
+`core.hooksPath` directory, place this snippet in the `core.hooksPath`
+scripts:
++
+....
+	if [ -f .git/hooks/`basename $0` ] && [ -x .git/hooks/`basename $0` ]
+		.git/hooks/`basename $0`
+	fi
+....
 
 core.editor::
 	Commands such as `commit` and `tag` that let you edit
